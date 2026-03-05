@@ -1,0 +1,39 @@
+pipeline {
+    agent any // or use a specific Docker image with Python pre-installed
+    
+    stages {
+        stage('Setup Environment') {
+            steps {
+                // Ensure Python and pip are available, and install dependencies
+                sh 'python3 --version'
+                sh 'pip install -r requirements.txt'
+            }
+        }
+
+        stage('Run Unit Tests') {
+            steps {
+                // Run tests with pytest and generate JUnit-compatible XML reports and coverage reports
+                sh 'pytest --junitxml=reports/test-results.xml --cov=src --cov-report=xml:reports/coverage.xml tests/'
+            }
+            post {
+                always {
+                    // Publish test results using the JUnit plugin
+                    junit 'reports/test-results.xml'
+                }
+            }
+        }
+
+        stage('Code Review & Quality Analysis') {
+            steps {
+                // Run Pylint and output results to a log file
+                sh 'pylint src/ --output-format=parseable > pylint.log || echo "Pylint analysis complete, see log for details"'
+            }
+            post {
+                always {
+                    // Publish code quality reports using the Warnings Next Generation Plugin
+                    recordIssues enabledForFailure: true, tools: [pyLint(name: 'Pylint Report', pattern: '**/pylint.log')]
+                }
+            }
+        }
+    }
+}
