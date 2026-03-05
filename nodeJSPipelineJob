@@ -1,0 +1,42 @@
+pipeline {
+    agent any
+    tools {
+        nodejs 'node-20' // Name configured in Global Tool Configuration
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        stage('Install Dependencies') {
+            steps {
+                sh 'npm install'
+                sh 'npm install -g @angular/cli'
+            }
+        }
+        stage('Code Review (Lint)') {
+            steps {
+                // Runs linter for code review
+                sh 'npm run lint' 
+            }
+        }
+        stage('Unit Tests') {
+            steps {
+                // Run Angular tests in headless mode for CI
+                sh 'ng test --watch=false --browsers=ChromeHeadless'
+            }
+            post {
+                always {
+                    // Publish test results
+                    junit '**/test-results.xml' 
+                }
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'npm run build --prod'
+            }
+        }
+    }
+}
