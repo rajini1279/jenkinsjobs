@@ -1,0 +1,45 @@
+pipeline {
+    agent {
+        label 'devproject1'
+    }
+
+    stages {
+         stage('Clone') {
+            steps {
+                echo 'clong Repository...'
+                git( 
+                    url: 'https://github.com/rajini1279/devOpsTraining2026B1.git',
+                     branch: 'master',
+                     credentialsId: 'github-credentials'
+                    )
+            }
+         }
+         stage('Build'){
+            steps{
+                echo 'Building application'
+                echo 'Build completed!!!!'
+            }
+         }
+         stage('Test'){
+            steps{
+                echo 'Testing application'
+                echo 'Test completed!!!!'
+            }
+         }
+         stage('Deploy'){
+            steps{
+                echo 'Deploy application'
+                echo 'Deploy completed!!!!'
+            }
+         }
+    }
+     post {
+        success {
+            echo 'pipeline completed success!'
+        }
+        failure {
+            echo 'pipeline Failed please revist the code and trigger again after fix'
+        }
+     }
+
+}
