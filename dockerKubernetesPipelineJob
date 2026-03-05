@@ -1,0 +1,63 @@
+pipeline {
+    agent any
+    environment {
+        DOCKER_IMAGE = "my-app"
+        DOCKER_TAG   = "${env.BUILD_NUMBER}"
+        REGISTRY     = "your-registry-url" // e.g., docker.io/username
+        IMAGE_FULL   = "${REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG}"
+        KUBECONFIG   = credentials('kubeconfig') // Jenkins Credential ID
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        stage('Code Preview / Linting') {
+            steps {
+                echo 'Running static code analysis...'
+                // Example: sh 'flake8 .' or sh 'npm run lint'
+            }
+        }
+        stage('Unit Tests') {
+            steps {
+                echo 'Running unit tests...'
+                // Example: sh 'pytest' or sh 'npm test'
+            }
+        }
+        stage('Build Image') {
+            steps {
+                script {
+                    echo 'Building Docker image...'
+                    sh "docker build -t ${IMAGE_FULL} ."
+                }
+            }
+        }
+        stage('Push Image') {
+            steps {
+                script {
+                    echo 'Pushing Docker image...'
+                    // Requires docker login in Jenkins credentials
+                    sh "docker push ${IMAGE_FULL}"
+                }
+            }
+        }
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    echo 'Deploying to Kubernetes...'
+                    // Replace deployment image
+                    sh "sed -i 's|IMAGE_PLACEHOLDER|${IMAGE_FULL}|g' k8s/deployment.yaml"
+                    sh "kubectl apply -f k8s/deployment.yaml --kubeconfig=${KUBECONFIG}"
+                }
+            }
+        }
+    }
+    post {
+        always {
+            // Clean up workspace
+            cleanWs()
+            // Optional: sh "docker rmi ${IMAGE_FULL}"
+        }
+    }
+}
