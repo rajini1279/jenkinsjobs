@@ -9,7 +9,7 @@ pipeline {
     stages {
          stage('Build') {
             steps{
-                #echo y | sudo yum install git aws-cli openjdk nodejs mvn docker 
+                //echo y | sudo yum install git aws-cli openjdk nodejs mvn docker 
                 echo "Tools are installed successfully" 
             }
      }
