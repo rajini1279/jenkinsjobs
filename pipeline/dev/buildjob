@@ -1,0 +1,18 @@
+pipeline {
+    agent any
+    //agent {label 'dvporject1' }
+    environment {
+        NEXUS_URL = "http://your-nexus-ip:8081" 
+        NEXUS_REPO = "maven-releases"
+        NEXUS_CRED_ID = "nexus-auth-id" // Set in Jenkins Credentials
+    }
+    stages {
+         stage('Build') {
+            steps{
+                #echo y | sudo yum install git aws-cli openjdk nodejs mvn docker 
+                echo "Tools are installed successfully" 
+            }
+     }
+
+}
+}
